@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package harbor.listing;
+
+option go_package = "harbor/internal/pb/listing";
+
+service ListingService {
+  // Получить данные для расчета бронирования
+  rpc GetListingDetails (ListingRequest) returns (ListingResponse);
+}
+
+message ListingRequest {
+  string listing_id = 1;
+}
+
+message ListingResponse {
+  string listing_id = 1;
+  double price_per_night = 2;
+  string currency = 3;
+  string host_id = 4;
+  bool active = 5; // Не скрыто ли объявление
+}

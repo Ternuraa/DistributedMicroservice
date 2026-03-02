@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package harbor.comm;
+
+service NotificationService {
+  rpc SendSystemNotification (NotifyRequest) returns (NotifyResponse);
+}
+
+message NotifyRequest {
+  string user_id = 1;
+  string title = 2;
+  string message = 3;
+  string type = 4; // "booking_confirmed", "new_message", etc.
+}
+
+message NotifyResponse {
+  bool delivered = 1;
+}

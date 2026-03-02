@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package harbor.booking;
+
+option go_package = "harbor/internal/pb/booking";
+
+// Booking & Availability Service — контракт для создания бронирований и проверки доступности.
+service BookingService {
+  // Создать бронирование (проверяет доступность, резервирует даты).
+  rpc CreateReservation (CreateReservationRequest) returns (CreateReservationResponse);
+  // Получить данные бронирования по ID (для уведомлений, отзывов, чата).
+  rpc GetReservation (GetReservationRequest) returns (GetReservationResponse);
+  // Обновить статус после оплаты (вызывается после успешного платежа).
+  rpc SetReservationPaid (SetReservationPaidRequest) returns (SetReservationPaidResponse);
+}
+
+message CreateReservationRequest {
+  string guest_id = 1;
+  string listing_id = 2;
+  string check_in_date = 3;  // ISO 8601
+  string check_out_date = 4;
+}
+
+message CreateReservationResponse {
+  string reservation_id = 1;
+  double total_amount = 2;
+  string currency = 3;
+  string status = 4;  // Pending, Confirmed, etc.
+}
+
+message GetReservationRequest {
+  string reservation_id = 1;
+}
+
+message GetReservationResponse {
+  string reservation_id = 1;
+  string guest_id = 2;
+  string listing_id = 3;
+  string host_id = 4;
+  string check_in_date = 5;
+  string check_out_date = 6;
+  double total_amount = 7;
+  string status = 8;
+}
+
+message SetReservationPaidRequest {
+  string reservation_id = 1;
+  string payment_id = 2;
+}
+
+message SetReservationPaidResponse {
+  bool updated = 1;
+}

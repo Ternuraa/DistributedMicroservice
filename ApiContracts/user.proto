@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package harbor.user;
+
+option go_package = "harbor/internal/pb/user";
+
+service UserService {
+  // Получить краткую информацию для проверки прав
+  rpc GetUserStatus (UserStatusRequest) returns (UserStatusResponse);
+}
+
+message UserStatusRequest {
+  string user_id = 1;
+}
+
+message UserStatusResponse {
+  string user_id = 1;
+  bool is_verified = 2; // Прошел ли KYC
+  bool is_banned = 3;   // Нет ли активного бана
+  string role = 4;      // "host" или "guest"
+}

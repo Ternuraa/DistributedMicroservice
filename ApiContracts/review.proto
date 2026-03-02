@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package harbor.review;
+
+// Review & Reputation Service — контракт для отзывов и модерации.
+service ReviewService {
+  // Оставить отзыв по завершённому бронированию.
+  rpc SubmitReview (SubmitReviewRequest) returns (SubmitReviewResponse);
+  // Получить отзывы по объекту (для витрины Listing).
+  rpc GetReviewsForListing (GetReviewsForListingRequest) returns (GetReviewsForListingResponse);
+  // Получить агрегированный рейтинг пользователя (для User Service или витрины).
+  rpc GetUserRating (GetUserRatingRequest) returns (GetUserRatingResponse);
+}
+
+message SubmitReviewRequest {
+  string reservation_id = 1;
+  string author_id = 2;
+  string target_id = 3;   // listing_id или user_id
+  string target_type = 4; // "listing" | "user"
+  int32 rating = 5;       // 1–5
+  string text = 6;
+}
+
+message SubmitReviewResponse {
+  string review_id = 1;
+}
+
+message GetReviewsForListingRequest {
+  string listing_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message GetReviewsForListingResponse {
+  repeated ReviewItem reviews = 1;
+  double average_rating = 2;
+  int32 total_count = 3;
+}
+
+message ReviewItem {
+  string review_id = 1;
+  string author_id = 2;
+  int32 rating = 3;
+  string text = 4;
+  string created_at = 5;
+}
+
+message GetUserRatingRequest {
+  string user_id = 1;
+}
+
+message GetUserRatingResponse {
+  double average_rating = 1;
+  int32 review_count = 2;
+}
