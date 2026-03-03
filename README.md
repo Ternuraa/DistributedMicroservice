@@ -27,6 +27,7 @@ Infrastructure: Docker, Kubernetes, Nginx (API Gateway)
 Communication: Apache Kafka
 
 **Текущий MVP**
+
 Регистрация и верификация пользователей
 
 Создание объявлений с привязкой к гео-координатам
