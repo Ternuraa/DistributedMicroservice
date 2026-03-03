@@ -1,9 +1,9 @@
 gRPC API Contracts
 
-Все внутренние взаимодействия в Harbor типизированы с помощью gRPC.
+Все внутренние взаимодействия в Harbor типизированы с помощью gRPC
 
 Файлы контрактов:
- user.proto, listing.proto, `booking.proto`, notification.proto, review.proto
+ `user.proto`, `listing.proto`, `booking.proto`, `notification.proto`, `review.proto`
 
  
 Сводка endpoints:
