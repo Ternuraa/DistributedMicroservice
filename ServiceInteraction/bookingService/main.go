@@ -2,40 +2,43 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"net/http"
 	"time"
 
-	// Импортируем proto из ПАПКИ СОСЕДНЕГО СЕРВИСА (Listing)
 	proto "github.com/Ternuraa/DistributedMicroservice/listingService/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
-	// 1. Устанавливаем соединение с Listing Service (порт 50051)
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("Не удалось соединиться: %v", err)
-	}
-	defer conn.Close()
-
-	// 2. Создаем клиента
+	// Настраиваем подключение к Listing Service (gRPC)
+	conn, _ := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	client := proto.NewListingServiceClient(conn)
 
-	// 3. Делаем тестовый запрос (например, хотим забронировать жилье ID=123)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
+	// Создаем HTTP обработчик для бронирования
+	http.HandleFunc("/book", func(w http.ResponseWriter, r *http.Request) {
+		listingID := r.URL.Query().Get("id")
 
-	log.Println("Отправляем gRPC запрос в Listing Service...")
-	resp, err := client.GetListingInfo(ctx, &proto.ListingRequest{Id: "123"})
+		// Синхронный вызов соседа по gRPC
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 
-	if err != nil {
-		log.Fatalf("Ошибка при вызове: %v", err)
-	}
+		resp, err := client.GetListingInfo(ctx, &proto.ListingRequest{Id: listingID})
+		if err != nil {
+			http.Error(w, "Listing not found", http.StatusNotFound) // Обработка 404
+			return
+		}
 
-	// 4. Выводим результат
-	log.Printf("Успех! Получены данные от соседа:")
-	log.Printf("Жилье ID: %s", resp.Id)
-	log.Printf("Цена: %.2f", resp.Price)
-	log.Printf("Доступно: %v", resp.IsAvailable)
+		// Если нашли жилье, "бронируем"
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status": "success",
+			"price":  resp.Price,
+			"msg":    "Бронирование подтверждено!",
+		})
+	})
+
+	log.Println("Booking Service (REST + gRPC Client) запущен на :8082")
+	log.Fatal(http.ListenAndServe(":8082", nil))
 }
