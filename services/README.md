@@ -29,3 +29,11 @@ cd ServiceInteraction/api-gateway
 # Сборка образа и запуск контейнера
 docker build -t my-gateway .
 docker run --name gateway -p 80:80 -d my-gateway
+
+#### 2. Терминал 1: Listing Service (gRPC Сервер)
+
+```bash
+cd ServiceInteraction/listingService
+
+```bash
+go run .
