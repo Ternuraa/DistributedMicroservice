@@ -1,0 +1,3 @@
+service:
+  name: "listing_service"
+  port: ":50051" # Порт для gRPC

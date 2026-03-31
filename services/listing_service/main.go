@@ -1,38 +1,48 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
-
-	// Исправленный импорт с псевдонимом proto
-	proto "github.com/Ternuraa/DistributedMicroservice/listingService/proto"
+	"os"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"gopkg.in/yaml.v3"
 )
 
-func main() {
-	// 1. Создаем TCP-слушателя на порту 50051
-	lis, err := net.Listen("tcp", ":50051")
+type Config struct {
+	Service struct {
+		Port string `yaml:"port"`
+	} `yaml:"service"`
+}
+
+func LoadConfig(path string) (*Config, error) {
+	buf, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatalf("Не удалось запустить TCP-слушателя: %v", err)
+		return nil, err
+	}
+	var c Config
+	err = yaml.Unmarshal(buf, &c)
+	return &c, err
+}
+
+func main() {
+	cfg, err := LoadConfig("../../configs/listing_config.yaml")
+	if err != nil {
+		log.Fatalf("Ошибка конфига: %v", err)
 	}
 
-	// 2. Создаем экземпляр gRPC сервера
-	grpcServer := grpc.NewServer()
+	lis, err := net.Listen("tcp", cfg.Service.Port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
-	// 3. Регистрируем нашу логику (из server.go) в gRPC сервере
-	// Убедись, что ListingServer описан в файле server.go в этой же папке!
-	proto.RegisterListingServiceServer(grpcServer, &ListingServer{})
+	s := grpc.NewServer()
+	// Тут должна быть регистрация твоего сервера, например:
+	// proto.RegisterListingServiceServer(s, &server{})
 
-	// 4. Включаем рефлексию
-	reflection.Register(grpcServer)
-
-	log.Println("Listing Service успешно запущен на порту :50051")
-	log.Println("Ожидание входящих gRPC вызовов...")
-
-	// 5. Запускаем сервер
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Ошибка при запуске сервера: %v", err)
+	fmt.Printf("Listing Service (gRPC) запущен на %s\n", cfg.Service.Port)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }

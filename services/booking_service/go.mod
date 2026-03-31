@@ -2,10 +2,10 @@ module bookingService
 
 go 1.24.0
 
-replace github.com/Ternuraa/DistributedMicroservice/listingService => ../listingService
+replace github.com/Ternuraa/DistributedMicroservice/listing_service => ../listing_service
 
 require (
-	github.com/Ternuraa/DistributedMicroservice/listingService v0.0.0-00010101000000-000000000000
+	github.com/Ternuraa/DistributedMicroservice/listing_service v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.79.3
 )
 

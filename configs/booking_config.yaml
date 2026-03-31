@@ -1,0 +1,8 @@
+# configs/booking_config.yaml
+service:
+  name: "booking_service"
+  port: ":8082"
+
+# Адрес соседа (Listing Service), к которому стучимся по gRPC
+listing_service:
+  address: "localhost:50051"

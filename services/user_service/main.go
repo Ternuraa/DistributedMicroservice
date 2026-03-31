@@ -1,35 +1,40 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
-type User struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+type Config struct {
+	Service struct {
+		Port string `yaml:"port"`
+	} `yaml:"service"`
+}
+
+func LoadConfig(path string) (*Config, error) {
+	buf, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var c Config
+	err = yaml.Unmarshal(buf, &c)
+	return &c, err
 }
 
 func main() {
-	// Обработчик для получения профиля
-	http.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("id")
+	cfg, err := LoadConfig("../../configs/user_config.yaml")
+	if err != nil {
+		log.Fatalf("Ошибка конфига: %v", err)
+	}
 
-		// Имитация базы данных: возвращаем данные
-		user := User{
-			ID:    id,
-			Name:  "Savelieva Elizaveta",
-			Email: "savel@itmo.ru",
-		}
-
-		log.Printf("📥 Запрос профиля для ID: %s", id)
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(user)
+	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "User Profile Data")
 	})
 
-	log.Println("👤 User Service (REST) успешно запущен на порту :8081")
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	fmt.Printf("User Service (REST) запущен на %s\n", cfg.Service.Port)
+	log.Fatal(http.ListenAndServe(cfg.Service.Port, nil))
 }
