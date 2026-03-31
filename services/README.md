@@ -29,12 +29,13 @@ cd ServiceInteraction/api-gateway
 # Сборка образа и запуск контейнера
 docker build -t my-gateway .
 docker run --name gateway -p 80:80 -d my-gateway
+```
 
 ---
 
 ## Инструкция терминалы
 
-###2. Запуск Backend-сервисов
+### 2. Запуск Backend-сервисов
 Откройте три новых терминала и запустите сервисы в указанном порядке:
 
  Терминал 1: Listing Service (gRPC Сервер)
@@ -42,14 +43,17 @@ docker run --name gateway -p 80:80 -d my-gateway
 ```bash
 cd ServiceInteraction/listingService
 go run .
+```
 
 Терминал 2: User Service (REST Сервер)
 
 ```bash
 cd ServiceInteraction/userService
 go run .
+```
 Терминал 3: Booking Service (Клиент gRPC + REST Сервер)
 
 ```bash
 cd ServiceInteraction/bookingService
 go run .
+```
