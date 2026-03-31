@@ -30,6 +30,8 @@ cd ServiceInteraction/api-gateway
 docker build -t my-gateway .
 docker run --name gateway -p 80:80 -d my-gateway
 
+---
+
 #### 2. Терминал 1: Listing Service (gRPC Сервер)
 
 ```bash
