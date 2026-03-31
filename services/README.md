@@ -42,6 +42,8 @@ docker run --name gateway -p 80:80 -d my-gateway
 
 ```bash
 cd ServiceInteraction/listingService
+```
+```bash
 go run .
 ```
 
@@ -49,11 +51,25 @@ go run .
 
 ```bash
 cd ServiceInteraction/userService
+```
+```bash
 go run .
 ```
+
 Терминал 3: Booking Service (Клиент gRPC + REST Сервер)
 
 ```bash
 cd ServiceInteraction/bookingService
+```
+```bash
+go run .
+```
+
+Терминал 4: Booking Service (Клиент gRPC + REST Сервер)
+
+```bash
+cd ServiceInteraction/bookingService
+```
+```bash
 go run .
 ```
