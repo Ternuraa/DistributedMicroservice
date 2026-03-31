@@ -73,3 +73,26 @@ cd ServiceInteraction/bookingService
 ```bash
 go run .
 ```
+
+---
+
+## Проверка работы (Endpoints)
+
+Система доступна через единую точку входа (API Gateway) на порту 80:
+
+```bash
+Действие	URL (кликните для перехода)	Цепочка запроса
+Профиль пользователя	http://localhost/users/?id=1	Nginx -> User Service
+Бронирование жилья	http://localhost/bookings/?id=123	Nginx -> Booking -> Listing (gRPC)
+```
+
+---
+
+## Остановка системы
+
+```bash
+docker stop gateway
+```
+```bash
+docker rm gateway
+```
