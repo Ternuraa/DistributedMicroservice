@@ -32,10 +32,24 @@ docker run --name gateway -p 80:80 -d my-gateway
 
 ---
 
-#### 2. Терминал 1: Listing Service (gRPC Сервер)
+## Инструкция терминалы
+
+###2. Запуск Backend-сервисов
+Откройте три новых терминала и запустите сервисы в указанном порядке:
+
+ Терминал 1: Listing Service (gRPC Сервер)
 
 ```bash
 cd ServiceInteraction/listingService
+go run .
+
+Терминал 2: User Service (REST Сервер)
 
 ```bash
+cd ServiceInteraction/userService
+go run .
+Терминал 3: Booking Service (Клиент gRPC + REST Сервер)
+
+```bash
+cd ServiceInteraction/bookingService
 go run .
