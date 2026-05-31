@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Твой Gateway (на основе твоего Dockerfile)
+  gateway:
+    build: .
+    container_name: gateway
+    ports:
+      - "80:80"
+
+  # Брокер сообщений
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: harbor-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+# База Booking
+  booking-db:
+    image: postgres:15
+    container_name: booking-postgres
+    ports:
+      - "5442:5432" # Было "5432:5432". Теперь твой ПК будет видеть её на порту 5442
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: booking_db
+
+  # База Listing
+  listing-db:
+    image: postgres:15
+    container_name: listing-postgres
+    ports:
+      - "5443:5432" # Было "5433:5432". Теперь ПК будет видеть её на порту 5443
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: listing_db

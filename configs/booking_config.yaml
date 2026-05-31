@@ -5,4 +5,6 @@ service:
 
 # Адрес соседа (Listing Service), к которому стучимся по gRPC
 listing_service:
-  address: "localhost:50051"
+  address: "127.0.0.1:50051"
+
+  

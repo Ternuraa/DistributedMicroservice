@@ -57,4 +57,4 @@
 ---
 
 ## Инструкция по запуску
-*(Для запуска локальной копии проекта обратитесь к разделу [Quick Start Guide](./ServiceInteraction/README.md))*
+*(Для запуска локальной копии проекта обратитесь к разделу [Quick Start Guide](./services/README.md))*

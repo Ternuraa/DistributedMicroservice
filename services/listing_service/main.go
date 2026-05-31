@@ -1,47 +1,31 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
-	"os"
 
+	"github.com/Ternuraa/DistributedMicroservice/services/listing_service/internal/config"
+	proto "github.com/Ternuraa/DistributedMicroservice/services/listing_service/proto"
 	"google.golang.org/grpc"
-	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	Service struct {
-		Port string `yaml:"port"`
-	} `yaml:"service"`
-}
-
-func LoadConfig(path string) (*Config, error) {
-	buf, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var c Config
-	err = yaml.Unmarshal(buf, &c)
-	return &c, err
-}
-
 func main() {
-	cfg, err := LoadConfig("../../configs/listing_config.yaml")
+	cfg, err := config.Init("../../configs/listing_config.yaml")
 	if err != nil {
-		log.Fatalf("Ошибка конфига: %v", err)
+		log.Fatalf("Ошибка конфигурации: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", cfg.Service.Port)
+	lis, err := net.Listen("tcp", "127.0.0.1"+cfg.Service.Port) // Жестко привязываем к 127.0.0.1 для Windows
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
-	// Тут должна быть регистрация твоего сервера, например:
-	// proto.RegisterListingServiceServer(s, &server{})
 
-	fmt.Printf("Listing Service (gRPC) запущен на %s\n", cfg.Service.Port)
+	// РАСКОММЕНТИРОВАЛИ И ПОДКЛЮЧИЛИ: Регистрируем твой сервер из соседнего файла
+	proto.RegisterListingServiceServer(s, &ListingServer{})
+
+	log.Printf("🚀 Listing Service (gRPC) запущен на 127.0.0.1%s", cfg.Service.Port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
