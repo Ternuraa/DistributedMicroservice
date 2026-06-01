@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+spec:
+  selector:
+    app: booking-service
+  ports:
+    - name: http-api
+      protocol: TCP
+      port: {{ .Values.bookingService.apiPort }}
+      targetPort: http-api
+    - name: health
+      protocol: TCP
+      port: {{ .Values.bookingService.healthPort }}
+      targetPort: health
+  type: NodePort # Позволяет достучаться до сервиса с твоего компьютера за пределами K8s

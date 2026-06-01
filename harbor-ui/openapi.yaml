@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Harbor Booking Service API
+  description: |
+    API микросервиса бронирования жилья (Booking Service) в рамках распределенной системы Harbor.
+    Включает в себя поддержку сквозного логирования через `X-Correlation-ID`, 
+    политики таймаутов, повторные попытки (Retry) и отдачу метрик для Prometheus.
+  contact:
+    name: Elizaveta Savelieva
+    email: liza@example.com # Можно заменить на свой или удалить
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8082
+    description: Локальный Production-сервер (Docker Compose)
+  - url: http://127.0.0.1:8082
+    description: Локальный сервер разработки (go run)
+
+paths:
+  /book:
+    post:
+      summary: Создать бронирование жилья
+      description: Принимает ID объявления и ID пользователя, проверяет существование объявления через gRPC в listing_service и фиксирует бронь.
+      parameters:
+        - name: X-Correlation-ID
+          in: header
+          required: false
+          description: Сквозной идентификатор запроса для трассировки и логирования. Если не передан, генерируется автоматически.
+          schema:
+            type: string
+            example: req-20260601170000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequest'
+      responses:
+        '200':
+          description: Бронирование успешно оформлено
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "listing-123"
+                      title:
+                        type: string
+                        example: "Уютная квартира в центре Токио"
+                      price:
+                        type: integer
+                        example: 15000
+        '400':
+          description: Неверный формат JSON в теле запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid JSON"
+        '404':
+          description: Жилье не найдено (в том числе после всех повторных попыток gRPC вызова)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Listing not found after retries"
+
+  /health:
+    get:
+      summary: Проверка работоспособности (Health Check)
+      description: Используется инфраструктурой (Docker Compose, Kubernetes Liveness/Readiness probes) для мониторинга статуса сервиса.
+      responses:
+        '200':
+          description: Сервис полностью исправен и готов принимать трафик
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "OK"
+
+  /metrics:
+    get:
+      summary: Метрики Prometheus
+      description: Эндпоинт, с которого Prometheus scrape-агент забирает кастомные метрики (счетчики запросов, гистограммы длительности).
+      responses:
+        '200':
+          description: Текстовый формат метрик Prometheus
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP booking_http_requests_total Общее количество HTTP запросов к booking_service
+                  # TYPE booking_http_requests_total counter
+                  booking_http_requests_total{path="/book",status="200"} 3

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: listing-service
+  labels:
+    app: listing-service
+spec:
+  replicas: {{ .Values.listingService.replicas }}
+  selector:
+    matchLabels:
+      app: listing-service
+  template:
+    metadata:
+      labels:
+        app: listing-service
+    spec:
+      containers:
+        - name: listing-service
+          image: {{ .Values.listingService.image }}
+          imagePullPolicy: Never # Берем образ из локального окружения Minikube
+          ports:
+            - containerPort: {{ .Values.listingService.grpcPort }}
+              name: grpc
+            - containerPort: {{ .Values.listingService.healthPort }}
+              name: health
+          env:
+            - name: LISTING_PORT
+              value: ":{{ .Values.listingService.grpcPort }}"
+          
+          # --- ТРЕБОВАНИЕ НА 3 БАЛЛА: Liveness и Readiness Probes ---
+          # Проверяет, жива ли программа внутри контейнера. Если зависнет — K8s её перезапустит.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 5  # Сколько секунд подождать после старта перед первой проверкой
+            periodSeconds: 10       # Как часто проверять
+          
+          # Проверяет, готов ли сервис принимать сетевой трафик (клиентские запросы).
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 3
+            periodSeconds: 5

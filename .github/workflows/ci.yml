@@ -1,0 +1,53 @@
+name: Go Continuous Integration
+
+# Пайплайн будет запускаться автоматически при каждом пуше или пул-реквесте в ветки main или master
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-build:
+    name: Build and Test Booking Service
+    runs-on: ubuntu-latest # Запускаем проверки на чистой виртуальной машине Linux
+
+    steps:
+    # 1. Скачиваем код твоего репозитория на виртуальную машину
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    # 2. Устанавливаем Go нужной версии
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22' # Версия Go
+
+    # 3. Проверяем целостность зависимостей (go.mod)
+    - name: Verify dependencies
+      run: go mod verify
+      working-directory: services/booking_service
+
+    # 4. Проверяем форматирование кода (gofmt). Если код не причесан — сборка упадет.
+    - name: Run Go Linter (fmt)
+      run: |
+        if [ -n "$(gofmt -l .)" ]; then
+          echo "Код не отформатирован! Запустите 'go fmt ./...' локально."
+          exit 1
+        fi
+      working-directory: services/booking_service
+
+    # 5. Запускаем встроенный анализатор ошибок Go Vet
+    - name: Run Go Vet
+      run: go vet ./...
+      working-directory: services/booking_service
+
+    # 6. Запускаем тесты (если они у тебя есть)
+    - name: Run Tests
+      run: go test -v ./...
+      working-directory: services/booking_service
+
+    # 7. Проверяем, что проект успешно компилируется (собираем бинарник)
+    - name: Build Application
+      run: go build -v -o booking_service main.go
+      working-directory: services/booking_service

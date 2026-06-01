@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+  labels:
+    app: booking-service
+spec:
+  replicas: {{ .Values.bookingService.replicas }}
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      containers:
+        - name: booking-service
+          image: {{ .Values.bookingService.image }}
+          imagePullPolicy: Never
+          ports:
+            - containerPort: {{ .Values.bookingService.apiPort }}
+              name: http-api
+            - containerPort: {{ .Values.bookingService.healthPort }}
+              name: health
+          env:
+            - name: BOOKING_PORT
+              value: ":{{ .Values.bookingService.apiPort }}"
+            - name: LISTING_SERVICE_ADDR
+              value: "listing-service:{{ .Values.listingService.grpcPort }}" # DNS имя внутри K8s
+          
+          # --- ТРЕБОВАНИЕ НА 3 БАЛЛА: Liveness и Readiness Probes ---
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 3
+            periodSeconds: 5

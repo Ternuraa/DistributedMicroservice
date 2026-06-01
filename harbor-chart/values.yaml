@@ -1,0 +1,14 @@
+global:
+  environment: production
+
+listingService:
+  replicas: 1
+  image: listing-service:latest
+  grpcPort: 50051
+  healthPort: 8081
+
+bookingService:
+  replicas: 1
+  image: booking-service:latest
+  apiPort: 8082
+  healthPort: 8080
